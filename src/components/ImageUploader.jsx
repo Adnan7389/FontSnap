@@ -1,4 +1,6 @@
 import React, { useState, useRef } from 'react'
+import { FaCloudUploadAlt, FaFileImage, FaRedo, FaArrowRight } from 'react-icons/fa'
+import { MdOutlineDriveFolderUpload } from 'react-icons/md'
 
 /**
  * ImageUploader Component
@@ -49,7 +51,7 @@ function ImageUploader({ onImageUpload }) {
   const handleDrop = (e) => {
     e.preventDefault()
     setIsDragging(false)
-    
+
     const files = e.dataTransfer.files
     if (files.length > 0) {
       handleFileSelect(files[0])
@@ -78,33 +80,40 @@ function ImageUploader({ onImageUpload }) {
   }
 
   return (
-    <div className="max-w-2xl mx-auto">
-      <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">
-        Upload Your Image
-      </h2>
-      
+    <div className="max-w-4xl mx-auto">
+      <div className="text-center mb-8">
+        <h2 className="text-3xl font-bold text-gray-900 mb-3">
+          Upload Your Image
+        </h2>
+        <p className="text-gray-600 text-lg max-w-2xl mx-auto">
+          Drag and drop your image or browse to get started with font identification
+        </p>
+      </div>
+
       {!previewUrl ? (
         <div
-          className={`border-2 border-dashed rounded-xl p-12 text-center transition-colors ${
-            isDragging 
-              ? 'border-blue-500 bg-blue-50' 
-              : 'border-gray-300 hover:border-gray-400'
-          }`}
+          className={`border-3 border-dashed rounded-2xl p-8 sm:p-12 text-center transition-all duration-300 ${isDragging
+              ? 'border-indigo-500 bg-indigo-50 shadow-lg scale-[1.02]'
+              : 'border-gray-300 hover:border-gray-400 bg-white hover:shadow-md'
+            }`}
           onDragEnter={handleDragEnter}
           onDragLeave={handleDragLeave}
           onDragOver={handleDragOver}
           onDrop={handleDrop}
         >
-          <div className="mb-6">
-            <svg className="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-            </svg>
-            <p className="text-xl text-gray-600 mb-2">
-              Drag and drop your image here
+          <div className="mb-8">
+            <div className={`inline-flex items-center justify-center w-24 h-24 rounded-full mb-6 transition-all duration-300 ${isDragging
+                ? 'bg-indigo-100 text-indigo-600 scale-110'
+                : 'bg-gray-100 text-gray-400'
+              }`}>
+              <FaCloudUploadAlt className="text-4xl" />
+            </div>
+            <p className="text-xl font-semibold text-gray-700 mb-3">
+              {isDragging ? 'Drop your image here' : 'Drag and drop your image'}
             </p>
-            <p className="text-gray-500">or</p>
+            <p className="text-gray-500 mb-6 text-lg">or</p>
           </div>
-          
+
           <input
             ref={fileInputRef}
             type="file"
@@ -112,40 +121,61 @@ function ImageUploader({ onImageUpload }) {
             onChange={handleFileInputChange}
             className="hidden"
           />
-          
+
           <button
             onClick={() => fileInputRef.current?.click()}
-            className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium"
+            className="flex items-center justify-center space-x-3 px-8 py-4 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white rounded-xl transition-all duration-300 font-semibold shadow-md hover:shadow-lg mx-auto"
           >
-            Browse Files
+            <MdOutlineDriveFolderUpload className="text-xl" />
+            <span>Browse Files</span>
           </button>
-          
-          <p className="text-sm text-gray-500 mt-4">
-            Supports: JPG, PNG, GIF • Max size: 10MB
-          </p>
+
+          <div className="mt-8 p-4 bg-gray-50 rounded-lg max-w-md mx-auto">
+            <div className="flex items-center justify-center space-x-6 text-sm text-gray-600">
+              <div className="flex items-center space-x-2">
+                <FaFileImage className="text-indigo-500" />
+                <span>JPG, PNG, GIF</span>
+              </div>
+              <div className="h-4 w-px bg-gray-300"></div>
+              <div className="flex items-center space-x-2">
+                <svg className="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+                </svg>
+                <span>Max 10MB</span>
+              </div>
+            </div>
+          </div>
         </div>
       ) : (
-        <div className="space-y-6">
-          <div className="bg-gray-100 rounded-xl p-4">
-            <img 
-              src={previewUrl} 
-              alt="Preview" 
-              className="max-w-full max-h-96 mx-auto rounded-lg shadow-md"
-            />
+        <div className="space-y-8">
+          <div className="bg-gradient-to-br from-gray-50 to-white rounded-2xl p-6 shadow-lg border border-gray-200">
+            <div className="text-center mb-4">
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">Image Preview</h3>
+              <p className="text-gray-600">Ready for font identification</p>
+            </div>
+            <div className="bg-white rounded-xl p-4 shadow-inner border">
+              <img
+                src={previewUrl}
+                alt="Preview"
+                className="max-w-full max-h-80 mx-auto rounded-lg object-contain shadow-sm"
+              />
+            </div>
           </div>
-          
-          <div className="flex gap-4 justify-center">
+
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <button
               onClick={handleReset}
-              className="px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg transition-colors"
+              className="flex items-center justify-center space-x-3 px-8 py-4 bg-white hover:bg-gray-50 text-gray-700 rounded-xl transition-all duration-300 font-medium border border-gray-300 shadow-sm hover:shadow-md w-full sm:w-auto"
             >
-              Choose Different Image
+              <FaRedo className="text-gray-500" />
+              <span>Choose Different Image</span>
             </button>
             <button
               onClick={handleConfirmImage}
-              className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium"
+              className="flex items-center justify-center space-x-3 px-8 py-4 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white rounded-xl transition-all duration-300 font-semibold shadow-md hover:shadow-lg w-full sm:w-auto"
             >
-              Proceed to Crop
+              <span>Proceed to Crop</span>
+              <FaArrowRight />
             </button>
           </div>
         </div>
