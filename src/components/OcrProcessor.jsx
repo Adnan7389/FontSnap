@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { createWorker } from 'tesseract.js'
+import { FaEdit, FaEye, FaRedo, FaSearch, FaLightbulb, FaExclamationTriangle } from 'react-icons/fa'
+import { MdOutlineTextFields, MdOutlineCheckCircle } from 'react-icons/md'
 
 /**
  * OcrProcessor Component
@@ -38,7 +40,7 @@ function OcrProcessor({ imageUrl, onTextExtracted, setIsProcessing }) {
       worker = await createWorker('eng', 1, {
         logger: m => {
           console.log('OCR Progress:', m);
-          
+
           // Handle progress based on status
           if (m.status === 'recognizing text') {
             setProgress(80);
@@ -58,13 +60,13 @@ function OcrProcessor({ imageUrl, onTextExtracted, setIsProcessing }) {
 
       // Perform OCR with the worker - no need to initialize separately in v6
       const result = await worker.recognize(imageUrl);
-      
+
       const { text, confidence } = result.data;
 
       if (!text) {
         throw new Error('No text was recognized in the image');
       }
-      
+
       // Clean up extracted text
       const cleanedText = text.trim().replace(/\n+/g, ' ').replace(/\s+/g, ' ');
       setExtractedText(cleanedText);
@@ -73,7 +75,7 @@ function OcrProcessor({ imageUrl, onTextExtracted, setIsProcessing }) {
       if (confidence < 70) {
         setError(`Text recognition confidence is low (${confidence.toFixed(1)}%). You may need to edit the text.`);
       }
-      
+
       return { text, confidence };
     } catch (err) {
       console.error('OCR Processing Error:', err);
@@ -84,7 +86,7 @@ function OcrProcessor({ imageUrl, onTextExtracted, setIsProcessing }) {
         stack: err.stack,
         imageUrl: imageUrl ? 'URL available' : 'No URL'
       });
-      
+
       // Provide more specific error messages based on error type
       let userMessage = 'Failed to extract text. ';
       if (errorMessage.includes('network') || errorMessage.includes('fetch')) {
@@ -96,7 +98,7 @@ function OcrProcessor({ imageUrl, onTextExtracted, setIsProcessing }) {
       } else {
         userMessage += 'Please try again with a clearer image.';
       }
-      
+
       setError(userMessage);
       throw err;
     } finally {
@@ -128,72 +130,123 @@ function OcrProcessor({ imageUrl, onTextExtracted, setIsProcessing }) {
   }
 
   return (
-    <div className="max-w-2xl mx-auto">
-      <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">
-        Extract Text
-      </h2>
+    <div className="max-w-4xl mx-auto">
+      <div className="text-center mb-8">
+        <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl shadow-lg mb-4">
+          <MdOutlineTextFields className="text-white text-2xl" />
+        </div>
+        <h2 className="text-3xl font-bold text-gray-900 mb-3">
+          Extract Text
+        </h2>
+        <p className="text-gray-600 text-lg">
+          We're analyzing your image to identify the text content
+        </p>
+      </div>
 
       {/* Original cropped image */}
-      <div className="bg-gray-100 rounded-xl p-4 mb-6">
-        <img 
-          src={imageUrl} 
-          alt="Cropped text area" 
-          className="max-w-full mx-auto rounded-lg shadow-md"
-        />
+      <div className="bg-gradient-to-br from-gray-50 to-white rounded-2xl p-6 shadow-lg border border-gray-200 mb-8">
+        <div className="text-center mb-4">
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">Text Area Preview</h3>
+          <p className="text-gray-600 text-sm">The selected region for text extraction</p>
+        </div>
+        <div className="bg-white rounded-xl p-4 shadow-inner border">
+          <img
+            src={imageUrl}
+            alt="Cropped text area"
+            className="max-w-full max-h-64 mx-auto rounded-lg object-contain"
+          />
+        </div>
       </div>
 
       {/* Progress indicator */}
       {isProcessing && (
-        <div className="mb-6">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-gray-600">Extracting text...</span>
-            <span className="text-sm text-gray-600">{progress}%</span>
+        <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200 mb-8">
+          <div className="flex items-center space-x-4 mb-4">
+            <div className="flex-shrink-0">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+            </div>
+            <div className="flex-1">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-lg font-semibold text-gray-900">Extracting Text...</span>
+                <span className="text-lg font-bold text-indigo-600">{progress}%</span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-3">
+                <div
+                  className="bg-gradient-to-r from-indigo-500 to-purple-600 h-3 rounded-full transition-all duration-500 ease-out shadow-sm"
+                  style={{ width: `${progress}%` }}
+                ></div>
+              </div>
+            </div>
           </div>
-          <div className="w-full bg-gray-200 rounded-full h-2">
-            <div 
-              className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-              style={{ width: `${progress}%` }}
-            ></div>
-          </div>
+          <p className="text-gray-600 text-sm text-center">
+            {progress < 30 && 'Initializing OCR engine...'}
+            {progress >= 30 && progress < 60 && 'Loading language data...'}
+            {progress >= 60 && progress < 80 && 'Processing image...'}
+            {progress >= 80 && 'Recognizing text...'}
+          </p>
         </div>
       )}
 
       {/* Error message */}
       {error && (
-        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
-          <div className="flex items-start">
-            <svg className="w-5 h-5 text-yellow-600 mt-0.5 mr-3" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-            </svg>
-            <p className="text-yellow-800">{error}</p>
+        <div className="bg-gradient-to-r from-yellow-50 to-orange-50 border border-yellow-200 rounded-2xl p-6 mb-8 shadow-lg">
+          <div className="flex items-start space-x-4">
+            <div className="flex-shrink-0">
+              <div className="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center">
+                <FaExclamationTriangle className="text-yellow-600 text-lg" />
+              </div>
+            </div>
+            <div className="flex-1">
+              <h3 className="text-lg font-semibold text-yellow-800 mb-2">Attention Required</h3>
+              <p className="text-yellow-700">{error}</p>
+            </div>
           </div>
         </div>
       )}
 
       {/* Extracted text display/editing */}
       {extractedText && (
-        <div className="mb-6">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-lg font-medium text-gray-900">Extracted Text</h3>
+        <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200 mb-8">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-1">Extracted Text</h3>
+              <p className="text-gray-600">Review and edit if necessary</p>
+            </div>
             <button
               onClick={() => setIsEditing(!isEditing)}
-              className="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 rounded transition-colors"
+              className="flex items-center space-x-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl transition-all duration-300 font-medium"
             >
-              {isEditing ? 'Preview' : 'Edit'}
+              {isEditing ? (
+                <>
+                  <FaEye className="text-gray-600" />
+                  <span>Preview</span>
+                </>
+              ) : (
+                <>
+                  <FaEdit className="text-gray-600" />
+                  <span>Edit Text</span>
+                </>
+              )}
             </button>
           </div>
 
           {isEditing ? (
-            <textarea
-              value={extractedText}
-              onChange={handleTextChange}
-              className="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-              rows="4"
-              placeholder="Edit the extracted text if needed..."
-            />
+            <div className="space-y-4">
+              <textarea
+                value={extractedText}
+                onChange={handleTextChange}
+                className="w-full p-6 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 resize-none transition-all duration-300 text-lg"
+                rows="5"
+                placeholder="Edit the extracted text if needed..."
+              />
+              <div className="flex items-center space-x-2 text-sm text-gray-500">
+                <FaLightbulb className="text-indigo-500" />
+                <span>Make sure the text is accurate for better font matching</span>
+              </div>
+            </div>
           ) : (
-            <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg">
-              <p className="text-gray-900 whitespace-pre-wrap">
+            <div className="p-6 bg-gradient-to-br from-gray-50 to-white border-2 border-gray-200 rounded-xl">
+              <p className="text-gray-900 text-lg leading-relaxed whitespace-pre-wrap font-medium">
                 {extractedText || 'No text extracted'}
               </p>
             </div>
@@ -202,36 +255,59 @@ function OcrProcessor({ imageUrl, onTextExtracted, setIsProcessing }) {
       )}
 
       {/* Action buttons */}
-      <div className="flex gap-4 justify-center">
+      <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
         {error && (
           <button
             onClick={handleRetry}
-            className="px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg transition-colors"
             disabled={isProcessing}
+            className="flex items-center justify-center space-x-3 px-8 py-4 bg-white hover:bg-gray-50 text-gray-700 rounded-xl transition-all duration-300 font-semibold border border-gray-300 shadow-sm hover:shadow-md disabled:opacity-50 w-full sm:w-auto"
           >
-            Retry OCR
+            <FaRedo className={isProcessing ? 'animate-spin' : ''} />
+            <span>Retry OCR</span>
           </button>
         )}
-        
+
         <button
           onClick={handleConfirm}
-          className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium disabled:opacity-50"
           disabled={!extractedText.trim() || isProcessing}
+          className="flex items-center justify-center space-x-3 px-8 py-4 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white rounded-xl transition-all duration-300 font-semibold shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
         >
-          Find Matching Fonts
+          <FaSearch />
+          <span>Find Matching Fonts</span>
         </button>
       </div>
 
       {/* Tips */}
-      {!isProcessing && !extractedText && (
-        <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <h4 className="font-medium text-blue-900 mb-2">Tips for better OCR results:</h4>
-          <ul className="text-sm text-blue-800 space-y-1">
-            <li>• Use high-contrast images (dark text on light background)</li>
-            <li>• Ensure text is clearly visible and not blurry</li>
-            <li>• Crop closely around the text area</li>
-            <li>• Avoid images with complex backgrounds</li>
-          </ul>
+      {!isProcessing && !extractedText && !error && (
+        <div className="mt-8 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-2xl p-6">
+          <div className="flex items-start space-x-4">
+            <div className="flex-shrink-0">
+              <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                <FaLightbulb className="text-blue-600 text-lg" />
+              </div>
+            </div>
+            <div>
+              <h4 className="text-lg font-semibold text-blue-900 mb-3">Tips for Better OCR Results</h4>
+              <div className="grid md:grid-cols-2 gap-3 text-sm text-blue-800">
+                <div className="flex items-center space-x-2">
+                  <MdOutlineCheckCircle className="text-blue-500 flex-shrink-0" />
+                  <span>Use high-contrast images (dark text on light background)</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <MdOutlineCheckCircle className="text-blue-500 flex-shrink-0" />
+                  <span>Ensure text is clearly visible and not blurry</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <MdOutlineCheckCircle className="text-blue-500 flex-shrink-0" />
+                  <span>Crop closely around the text area</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <MdOutlineCheckCircle className="text-blue-500 flex-shrink-0" />
+                  <span>Avoid images with complex backgrounds</span>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>
