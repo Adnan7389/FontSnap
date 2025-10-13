@@ -1,42 +1,64 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+/* Basic body styles */
+body {
+  font-family: 'Roboto', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+/* Dark mode styles */
+.dark body {
+  background-color: #1a202c;
+  color: #cbd5e0;
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.dark .bg-white {
+  background-color: #2d3748;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+.dark .text-gray-900 {
+  color: #f7fafc;
 }
 
-.card {
-  padding: 2em;
+.dark .text-gray-500 {
+  color: #a0aec0;
 }
 
-.read-the-docs {
-  color: #888;
+.dark .border-gray-200 {
+  border-color: #4a5568;
+}
+
+.dark .hover\:bg-gray-50:hover {
+  background-color: #4a5568;
+}
+
+.dark .text-gray-700 {
+  color: #e2e8f0;
+}
+
+.dark .border-gray-300 {
+  border-color: #4a5568;
+}
+
+.dark .bg-gray-200 {
+  background-color: #4a5568;
+}
+
+.dark .text-gray-400 {
+  color: #a0aec0;
+}
+
+.dark .bg-gray-300 {
+  background-color: #4a5568;
+}
+
+.dark .text-indigo-600 {
+  color: #818cf8;
+}
+
+.dark .bg-gray-800 {
+  background-color: #1a202c;
+}
+
+.dark .text-gray-300 {
+  color: #d1d5db;
 }
