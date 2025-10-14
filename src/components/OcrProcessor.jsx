@@ -135,21 +135,21 @@ function OcrProcessor({ imageUrl, onTextExtracted, setIsProcessing }) {
         <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl shadow-lg mb-4">
           <MdOutlineTextFields className="text-white text-2xl" />
         </div>
-        <h2 className="text-3xl font-bold text-gray-900 mb-3">
+        <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-3">
           Extract Text
         </h2>
-        <p className="text-gray-600 text-lg">
+        <p className="text-gray-600 dark:text-gray-300 text-lg">
           We're analyzing your image to identify the text content
         </p>
       </div>
 
       {/* Original cropped image */}
-      <div className="bg-gradient-to-br from-gray-50 to-white rounded-2xl p-6 shadow-lg border border-gray-200 mb-8">
+      <div className="bg-gradient-to-br from-gray-50 to-white dark:from-gray-800 dark:to-gray-900 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700 mb-8">
         <div className="text-center mb-4">
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">Text Area Preview</h3>
-          <p className="text-gray-600 text-sm">The selected region for text extraction</p>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Text Area Preview</h3>
+          <p className="text-gray-600 dark:text-gray-400 text-sm">The selected region for text extraction</p>
         </div>
-        <div className="bg-white rounded-xl p-4 shadow-inner border">
+        <div className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-inner border dark:border-gray-700">
           <img
             src={imageUrl}
             alt="Cropped text area"
@@ -160,17 +160,17 @@ function OcrProcessor({ imageUrl, onTextExtracted, setIsProcessing }) {
 
       {/* Progress indicator */}
       {isProcessing && (
-        <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200 mb-8">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700 mb-8">
           <div className="flex items-center space-x-4 mb-4">
             <div className="flex-shrink-0">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
             </div>
             <div className="flex-1">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-lg font-semibold text-gray-900">Extracting Text...</span>
-                <span className="text-lg font-bold text-indigo-600">{progress}%</span>
+                <span className="text-lg font-semibold text-gray-900 dark:text-white">Extracting Text...</span>
+                <span className="text-lg font-bold text-indigo-600 dark:text-indigo-400">{progress}%</span>
               </div>
-              <div className="w-full bg-gray-200 rounded-full h-3">
+              <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
                 <div
                   className="bg-gradient-to-r from-indigo-500 to-purple-600 h-3 rounded-full transition-all duration-500 ease-out shadow-sm"
                   style={{ width: `${progress}%` }}
@@ -178,7 +178,7 @@ function OcrProcessor({ imageUrl, onTextExtracted, setIsProcessing }) {
               </div>
             </div>
           </div>
-          <p className="text-gray-600 text-sm text-center">
+          <p className="text-gray-600 dark:text-gray-400 text-sm text-center">
             {progress < 30 && 'Initializing OCR engine...'}
             {progress >= 30 && progress < 60 && 'Loading language data...'}
             {progress >= 60 && progress < 80 && 'Processing image...'}
@@ -189,16 +189,16 @@ function OcrProcessor({ imageUrl, onTextExtracted, setIsProcessing }) {
 
       {/* Error message */}
       {error && (
-        <div className="bg-gradient-to-r from-yellow-50 to-orange-50 border border-yellow-200 rounded-2xl p-6 mb-8 shadow-lg">
+        <div className="bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-900 dark:to-orange-900 border border-yellow-200 dark:border-yellow-700 rounded-2xl p-6 mb-8 shadow-lg">
           <div className="flex items-start space-x-4">
             <div className="flex-shrink-0">
-              <div className="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center">
-                <FaExclamationTriangle className="text-yellow-600 text-lg" />
+              <div className="w-10 h-10 bg-yellow-100 dark:bg-yellow-800 rounded-full flex items-center justify-center">
+                <FaExclamationTriangle className="text-yellow-600 dark:text-yellow-300 text-lg" />
               </div>
             </div>
             <div className="flex-1">
-              <h3 className="text-lg font-semibold text-yellow-800 mb-2">Attention Required</h3>
-              <p className="text-yellow-700">{error}</p>
+              <h3 className="text-lg font-semibold text-yellow-800 dark:text-yellow-200 mb-2">Attention Required</h3>
+              <p className="text-yellow-700 dark:text-yellow-300">{error}</p>
             </div>
           </div>
         </div>
@@ -206,24 +206,24 @@ function OcrProcessor({ imageUrl, onTextExtracted, setIsProcessing }) {
 
       {/* Extracted text display/editing */}
       {extractedText && (
-        <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200 mb-8">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700 mb-8">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-1">Extracted Text</h3>
-              <p className="text-gray-600">Review and edit if necessary</p>
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-1">Extracted Text</h3>
+              <p className="text-gray-600 dark:text-gray-400">Review and edit if necessary</p>
             </div>
             <button
               onClick={() => setIsEditing(!isEditing)}
-              className="flex items-center space-x-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl transition-all duration-300 font-medium"
+              className="flex items-center space-x-2 px-4 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-xl transition-all duration-300 font-medium"
             >
               {isEditing ? (
                 <>
-                  <FaEye className="text-gray-600" />
+                  <FaEye className="text-gray-600 dark:text-gray-400" />
                   <span>Preview</span>
                 </>
               ) : (
                 <>
-                  <FaEdit className="text-gray-600" />
+                  <FaEdit className="text-gray-600 dark:text-gray-400" />
                   <span>Edit Text</span>
                 </>
               )}
@@ -235,18 +235,18 @@ function OcrProcessor({ imageUrl, onTextExtracted, setIsProcessing }) {
               <textarea
                 value={extractedText}
                 onChange={handleTextChange}
-                className="w-full p-6 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 resize-none transition-all duration-300 text-lg"
+                className="w-full p-6 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 resize-none transition-all duration-300 text-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 rows="5"
                 placeholder="Edit the extracted text if needed..."
               />
-              <div className="flex items-center space-x-2 text-sm text-gray-500">
-                <FaLightbulb className="text-indigo-500" />
+              <div className="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
+                <FaLightbulb className="text-indigo-500 dark:text-indigo-400" />
                 <span>Make sure the text is accurate for better font matching</span>
               </div>
             </div>
           ) : (
-            <div className="p-6 bg-gradient-to-br from-gray-50 to-white border-2 border-gray-200 rounded-xl">
-              <p className="text-gray-900 text-lg leading-relaxed whitespace-pre-wrap font-medium">
+            <div className="p-6 bg-gradient-to-br from-gray-50 to-white dark:from-gray-700 dark:to-gray-800 border-2 border-gray-200 dark:border-gray-600 rounded-xl">
+              <p className="text-gray-900 dark:text-white text-lg leading-relaxed whitespace-pre-wrap font-medium">
                 {extractedText || 'No text extracted'}
               </p>
             </div>
@@ -260,7 +260,7 @@ function OcrProcessor({ imageUrl, onTextExtracted, setIsProcessing }) {
           <button
             onClick={handleRetry}
             disabled={isProcessing}
-            className="flex items-center justify-center space-x-3 px-8 py-4 bg-white hover:bg-gray-50 text-gray-700 rounded-xl transition-all duration-300 font-semibold border border-gray-300 shadow-sm hover:shadow-md disabled:opacity-50 w-full sm:w-auto"
+            className="flex items-center justify-center space-x-3 px-8 py-4 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-xl transition-all duration-300 font-semibold border border-gray-300 dark:border-gray-600 shadow-sm hover:shadow-md disabled:opacity-50 w-full sm:w-auto"
           >
             <FaRedo className={isProcessing ? 'animate-spin' : ''} />
             <span>Retry OCR</span>
@@ -279,30 +279,30 @@ function OcrProcessor({ imageUrl, onTextExtracted, setIsProcessing }) {
 
       {/* Tips */}
       {!isProcessing && !extractedText && !error && (
-        <div className="mt-8 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-2xl p-6">
+        <div className="mt-8 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900 dark:to-indigo-900 border border-blue-200 dark:border-blue-700 rounded-2xl p-6">
           <div className="flex items-start space-x-4">
             <div className="flex-shrink-0">
-              <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                <FaLightbulb className="text-blue-600 text-lg" />
+              <div className="w-10 h-10 bg-blue-100 dark:bg-blue-800 rounded-full flex items-center justify-center">
+                <FaLightbulb className="text-blue-600 dark:text-blue-300 text-lg" />
               </div>
             </div>
             <div>
-              <h4 className="text-lg font-semibold text-blue-900 mb-3">Tips for Better OCR Results</h4>
-              <div className="grid md:grid-cols-2 gap-3 text-sm text-blue-800">
+              <h4 className="text-lg font-semibold text-blue-900 dark:text-blue-200 mb-3">Tips for Better OCR Results</h4>
+              <div className="grid md:grid-cols-2 gap-3 text-sm text-blue-800 dark:text-blue-300">
                 <div className="flex items-center space-x-2">
-                  <MdOutlineCheckCircle className="text-blue-500 flex-shrink-0" />
+                  <MdOutlineCheckCircle className="text-blue-500 dark:text-blue-400 flex-shrink-0" />
                   <span>Use high-contrast images (dark text on light background)</span>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <MdOutlineCheckCircle className="text-blue-500 flex-shrink-0" />
+                  <MdOutlineCheckCircle className="text-blue-500 dark:text-blue-400 flex-shrink-0" />
                   <span>Ensure text is clearly visible and not blurry</span>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <MdOutlineCheckCircle className="text-blue-500 flex-shrink-0" />
+                  <MdOutlineCheckCircle className="text-blue-500 dark:text-blue-400 flex-shrink-0" />
                   <span>Crop closely around the text area</span>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <MdOutlineCheckCircle className="text-blue-500 flex-shrink-0" />
+                  <MdOutlineCheckCircle className="text-blue-500 dark:text-blue-400 flex-shrink-0" />
                   <span>Avoid images with complex backgrounds</span>
                 </div>
               </div>
