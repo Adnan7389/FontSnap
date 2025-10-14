@@ -1,0 +1,20 @@
+.cropper-bg {
+  background-image: none;
+}
+
+.dark .cropper-bg {
+  background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQAQMAAAAlPW0iAAAAA3NCSVQICAjb4U/gAAAABlBMVEXMzMz////TjRV2AAAACXBIWXMAAArrAAAK6wGCiw1aAAAAHHRFWHRTb2Z0d2FyZQBBZG9iZSBGaXJld29ya3MgQ1M26LyyjAAAABFJREFUCJlj+M/AgBVhF/0PAH6/D/HkDxOGAAAAAElFTkSuQmCC");
+}
+
+.dark .cropper-modal {
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.dark .cropper-view-box {
+  outline-color: #38b2ac;
+}
+
+.dark .cropper-line,
+.dark .cropper-point {
+  background-color: #38b2ac;
+}
