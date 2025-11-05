@@ -1,7 +1,11 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import { compareCanvasText, renderTextToCanvas } from '../utils/fontUtils'
 import { FaFont, FaSearch, FaChartLine, FaShapes, FaSpinner } from 'react-icons/fa'
 import { MdOutlineTextFields, MdOutlineAutoAwesome } from 'react-icons/md'
+import WebFont from 'webfontloader'
+
+// Google Fonts API Key from environment variables
+const GOOGLE_FONTS_API_KEY = import.meta.env.VITE_GOOGLE_FONTS_API_KEY
 
 /**
  * FontMatcher Component
@@ -11,68 +15,188 @@ import { MdOutlineTextFields, MdOutlineAutoAwesome } from 'react-icons/md'
 function FontMatcher({ extractedText, croppedImage, onMatchingComplete, setIsProcessing }) {
   const [progress, setProgress] = useState(0)
   const [currentFont, setCurrentFont] = useState('')
-
-  // Google Fonts to test against
-  const testFonts = [
-    { name: 'Roboto', family: 'Roboto, sans-serif', weight: 400 },
-    { name: 'Roboto Medium', family: 'Roboto, sans-serif', weight: 500 },
-    { name: 'Roboto Bold', family: 'Roboto, sans-serif', weight: 700 },
-    { name: 'Lato', family: 'Lato, sans-serif', weight: 400 },
-    { name: 'Lato Bold', family: 'Lato, sans-serif', weight: 700 },
-    { name: 'Montserrat', family: 'Montserrat, sans-serif', weight: 400 },
-    { name: 'Montserrat SemiBold', family: 'Montserrat, sans-serif', weight: 600 },
-    { name: 'Montserrat Bold', family: 'Montserrat, sans-serif', weight: 700 },
-    { name: 'Playfair Display', family: 'Playfair Display, serif', weight: 400 },
-    { name: 'Playfair Display Bold', family: 'Playfair Display, serif', weight: 700 },
-  ]
+  const [availableFonts, setAvailableFonts] = useState([])
+  const [fontsLoaded, setFontsLoaded] = useState(false)
+  const [fontsTestedCount, setFontsTestedCount] = useState(0)
+  const [performanceMetrics, setPerformanceMetrics] = useState(null)
+  const matchingStarted = useRef(false)
 
   useEffect(() => {
-    performFontMatching()
-  }, [extractedText, croppedImage])
+    // Fetch Google Fonts list
+    const fetchGoogleFonts = async () => {
+      if (!GOOGLE_FONTS_API_KEY) {
+        console.error('Google Fonts API Key is not set. Please set VITE_GOOGLE_FONTS_API_KEY in your .env file.')
+        // Fallback to a small default list if API key is missing
+        setAvailableFonts([
+          { name: 'Roboto', family: 'Roboto, sans-serif', weights: ['400', '700'] },
+          { name: 'Lato', family: 'Lato, sans-serif', weights: ['400', '700'] },
+          { name: 'Montserrat', family: 'Montserrat, sans-serif', weights: ['400', '700'] },
+        ])
+        return
+      }
+
+      try {
+        const response = await fetch(
+          `https://www.googleapis.com/webfonts/v1/webfonts?key=${GOOGLE_FONTS_API_KEY}&sort=popularity&subset=latin`
+        )
+        const data = await response.json()
+        const fonts = data.items.slice(0, 20).map(font => ({
+          name: font.family,
+          family: `'${font.family}', sans-serif`,
+          weights: font.variants
+            .filter(v => /^[0-9]+$/.test(v) || v.endsWith('italic') || v === 'regular') // keep only numeric weights or italic variants
+            .map(v => v === 'regular' ? '400' : v) // Normalize 'regular' to '400'
+        }))
+        setAvailableFonts(fonts)
+      } catch (error) {
+        console.error('Error fetching Google Fonts:', error)
+        // Fallback to a small default list if API fails
+        setAvailableFonts([
+          { name: 'Roboto', family: 'Roboto, sans-serif', weights: ['400', '700'] },
+          { name: 'Lato', family: 'Lato, sans-serif', weights: ['400', '700'] },
+          { name: 'Montserrat', family: 'Montserrat, sans-serif', weights: ['400', '700'] },
+        ])
+      }
+    }
+
+    fetchGoogleFonts()
+  }, [])
+
+  useEffect(() => {
+    if (availableFonts.length > 0 && extractedText && croppedImage) {
+      const loadAllFonts = async () => {
+        const batchSize = 10;
+        for (let i = 0; i < availableFonts.length; i += batchSize) {
+          const batch = availableFonts.slice(i, i + batchSize);
+          const fontFamiliesToLoad = batch.map(font => {
+            const weights = font.weights.join(',');
+            return `${font.name}:${weights}`
+          })
+
+          await new Promise((resolve) => {
+            WebFont.load({
+              google: {
+                families: fontFamiliesToLoad,
+                api: 'https://fonts.googleapis.com/css?family='
+              },
+              timeout: 5000, // 5 seconds timeout
+              active: () => {
+                resolve();
+              },
+              inactive: () => {
+                console.warn('Some fonts could not be loaded.');
+                resolve();
+              },
+              fontinactive: (familyName, fvd) => {
+                console.warn(`Font '${familyName}' with variation '${fvd}' failed to load.`);
+              }
+            });
+          });
+        }
+        setFontsLoaded(true);
+      }
+
+      loadAllFonts();
+    }
+  }, [availableFonts, extractedText, croppedImage]);
+
+  useEffect(() => {
+    if (fontsLoaded && extractedText && croppedImage && !matchingStarted.current) {
+      if (availableFonts.length > 0) {
+        matchingStarted.current = true;
+        try {
+          performFontMatching();
+        } catch (error) {
+          console.error('Error during font matching:', error);
+          onMatchingComplete([]);
+          setIsProcessing(false);
+        }
+      } else {
+        console.warn('No fonts available to match.');
+      }
+    }
+  }, [fontsLoaded, extractedText, croppedImage, availableFonts]);
+
+  useEffect(() => {
+    if (performanceMetrics) {
+      console.log('Performance Metrics:', performanceMetrics)
+    }
+  }, [performanceMetrics])
 
   // Main font matching algorithm
   const performFontMatching = async () => {
-    if (!extractedText || !croppedImage) return
+    if (!extractedText || !croppedImage || availableFonts.length === 0) return
+
+    const startTime = performance.now()
 
     setIsProcessing(true)
     const matches = []
+    let testedCount = 0
 
     try {
       // Create reference canvas from original cropped image
+      const refCanvasStartTime = performance.now()
       const referenceCanvas = await createReferenceCanvas(croppedImage)
+      const refCanvasEndTime = performance.now()
 
-      // Test each font
-      for (let i = 0; i < testFonts.length; i++) {
-        const font = testFonts[i]
-        setCurrentFont(font.name)
-        setProgress(((i + 1) / testFonts.length) * 100)
+      const fontLoopStartTime = performance.now()
+      // Iterate through each available font and its weights
+      for (const font of availableFonts) {
+        for (const weight of font.weights) {
+          const parsedWeight = parseInt(weight, 10);
+          if (isNaN(parsedWeight)) continue;
 
-        // Render text in current font
-        const testCanvas = renderTextToCanvas(extractedText, font)
+          const fontToTest = {
+            name: `${font.name} ${weight}`,
+            family: font.family,
+            weight: parsedWeight
+          }
 
-        // Calculate similarity score
-        const similarity = compareCanvasText(referenceCanvas, testCanvas)
+          setCurrentFont(fontToTest.name)
+          testedCount++;
+          setFontsTestedCount(testedCount)
+          setProgress((testedCount / (availableFonts.reduce((acc, f) => acc + f.weights.length, 0))) * 100)
 
-        matches.push({
-          ...font,
-          similarity: similarity,
-          previewCanvas: testCanvas
-        })
+          // Render text in current font
+          const testCanvas = renderTextToCanvas(extractedText, fontToTest)
 
-        // Add small delay to show progress
-        await new Promise(resolve => setTimeout(resolve, 100))
+          // Calculate similarity score
+          const similarity = compareCanvasText(referenceCanvas, testCanvas)
+
+          matches.push({
+            ...fontToTest,
+            similarity: similarity,
+            previewCanvas: testCanvas
+          })
+
+          // Add small delay to show progress
+          await new Promise(resolve => setTimeout(resolve, 10)) // Reduced delay for faster testing
+        }
       }
+      const fontLoopEndTime = performance.now()
 
       // Sort by similarity (higher is better) and take top 3
       const topMatches = matches
         .sort((a, b) => b.similarity - a.similarity)
         .slice(0, 3)
 
+      const endTime = performance.now()
+      const metrics = {
+        totalMatchingTime: `${(endTime - startTime).toFixed(2)}ms`,
+        referenceCanvasCreation: `${(refCanvasEndTime - refCanvasStartTime).toFixed(2)}ms`,
+        fontLoop: `${(fontLoopEndTime - fontLoopStartTime).toFixed(2)}ms`,
+        fontsTested: testedCount,
+        fontsAvailable: availableFonts.length
+      }
+      setPerformanceMetrics(metrics)
+
       onMatchingComplete(topMatches)
 
     } catch (error) {
       console.error('Font matching error:', error)
       onMatchingComplete([])
+    } finally {
+      setIsProcessing(false)
     }
   }
 
@@ -179,13 +303,13 @@ function FontMatcher({ extractedText, croppedImage, onMatchingComplete, setIsPro
           <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-3">
             <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">Fonts Tested</div>
             <div className="text-lg font-bold text-gray-900 dark:text-white">
-              {Math.floor((progress / 100) * testFonts.length)}/{testFonts.length}
+              {fontsTestedCount}/{availableFonts.reduce((acc, font) => acc + font.weights.length, 0)}
             </div>
           </div>
           <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-3">
             <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">Current Stage</div>
             <div className="text-lg font-bold text-gray-900 dark:text-white">
-              {progress < 50 ? 'Initial' : progress < 80 ? 'Detailed' : 'Final'}
+              {progress < 50 ? 'Fetching' : progress < 80 ? 'Loading' : 'Comparing'}
             </div>
           </div>
           <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-3">
